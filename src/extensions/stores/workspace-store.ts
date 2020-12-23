@@ -1,5 +1,5 @@
 import { Singleton } from "../core-api/utils";
-import { workspaceStore as internalWorkspaceStore, WorkspaceStore as InternalWorkspaceStore, Workspace, WorkspaceId } from "../../common/workspace-store";
+import { WorkspaceStore as InternalWorkspaceStore, Workspace, WorkspaceId } from "../../common/workspace-store";
 import { ObservableMap } from "mobx";
 
 export { Workspace } from "../../common/workspace-store";
@@ -10,7 +10,12 @@ export type { WorkspaceId, WorkspaceModel } from "../../common/workspace-store";
  *
  * @beta
  */
+// @ts-ignore
 export class WorkspaceStore extends Singleton {
+  static getInstance(): WorkspaceStore {
+    return WorkspaceStore.getInstanceOrCreate();
+  }
+
   /**
    * Default workspace id, this workspace is always present
    */
@@ -20,42 +25,42 @@ export class WorkspaceStore extends Singleton {
    * Currently active workspace id
    */
   get currentWorkspaceId(): string {
-    return internalWorkspaceStore.currentWorkspaceId;
+    return InternalWorkspaceStore.getInstance().currentWorkspaceId;
   }
 
   /**
    * Set active workspace id
    */
   set currentWorkspaceId(id: string) {
-    internalWorkspaceStore.currentWorkspaceId = id;
+    InternalWorkspaceStore.getInstance().currentWorkspaceId = id;
   }
 
   /**
    * Map of all workspaces
    */
   get workspaces(): ObservableMap<string, Workspace> {
-    return internalWorkspaceStore.workspaces;
+    return InternalWorkspaceStore.getInstance().workspaces;
   }
 
   /**
    * Currently active workspace
    */
   get currentWorkspace(): Workspace {
-    return internalWorkspaceStore.currentWorkspace;
+    return InternalWorkspaceStore.getInstance().currentWorkspace;
   }
 
   /**
    * Array of all workspaces
    */
   get workspacesList(): Workspace[] {
-    return internalWorkspaceStore.workspacesList;
+    return InternalWorkspaceStore.getInstance().workspacesList;
   }
 
   /**
    * Array of all enabled (visible) workspaces
    */
   get enabledWorkspacesList(): Workspace[] {
-    return internalWorkspaceStore.enabledWorkspacesList;
+    return InternalWorkspaceStore.getInstance().enabledWorkspacesList;
   }
 
   /**
@@ -63,7 +68,7 @@ export class WorkspaceStore extends Singleton {
    * @param id workspace id
    */
   getById(id: WorkspaceId): Workspace {
-    return internalWorkspaceStore.getById(id);
+    return InternalWorkspaceStore.getInstance().getById(id);
   }
 
   /**
@@ -71,7 +76,7 @@ export class WorkspaceStore extends Singleton {
    * @param name workspace name
    */
   getByName(name: string): Workspace {
-    return internalWorkspaceStore.getByName(name);
+    return InternalWorkspaceStore.getInstance().getByName(name);
   }
 
   /**
@@ -79,7 +84,7 @@ export class WorkspaceStore extends Singleton {
    * @param id workspace id
    */
   setActive(id = WorkspaceStore.defaultId) {
-    return internalWorkspaceStore.setActive(id);
+    return InternalWorkspaceStore.getInstance().setActive(id);
   }
 
   /**
@@ -87,7 +92,7 @@ export class WorkspaceStore extends Singleton {
    * @param workspace workspace
    */
   addWorkspace(workspace: Workspace) {
-    return internalWorkspaceStore.addWorkspace(workspace);
+    return InternalWorkspaceStore.getInstance().addWorkspace(workspace);
   }
 
   /**
@@ -95,7 +100,7 @@ export class WorkspaceStore extends Singleton {
    * @param workspace workspace
    */
   updateWorkspace(workspace: Workspace) {
-    return internalWorkspaceStore.updateWorkspace(workspace);
+    return InternalWorkspaceStore.getInstance().updateWorkspace(workspace);
   }
 
   /**
@@ -103,7 +108,7 @@ export class WorkspaceStore extends Singleton {
    * @param workspace workspace
    */
   removeWorkspace(workspace: Workspace) {
-    return internalWorkspaceStore.removeWorkspace(workspace);
+    return InternalWorkspaceStore.getInstance().removeWorkspace(workspace);
   }
 
   /**
@@ -111,8 +116,6 @@ export class WorkspaceStore extends Singleton {
    * @param id workspace
    */
   removeWorkspaceById(id: WorkspaceId) {
-    return internalWorkspaceStore.removeWorkspaceById(id);
+    return InternalWorkspaceStore.getInstance().removeWorkspaceById(id);
   }
 }
-
-export const workspaceStore = WorkspaceStore.getInstance<WorkspaceStore>();

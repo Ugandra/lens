@@ -8,6 +8,7 @@ import { initMenu } from "./menu";
 import { initTray } from "./tray";
 import { Singleton } from "../common/utils";
 import { ClusterFrameInfo, clusterFrameMap } from "../common/cluster-frames";
+import logger from "./logger";
 
 export class WindowManager extends Singleton {
   protected mainWindow: BrowserWindow;
@@ -60,27 +61,28 @@ export class WindowManager extends Singleton {
       this.windowState.manage(this.mainWindow);
 
       // open external links in default browser (target=_blank, window.open)
-      this.mainWindow.webContents.on("new-window", (event, url) => {
-        event.preventDefault();
-        shell.openExternal(url);
-      });
-      this.mainWindow.webContents.on("dom-ready", () => {
-        appEventBus.emit({name: "app", action: "dom-ready"});
-      });
-      this.mainWindow.on("focus", () => {
-        appEventBus.emit({name: "app", action: "focus"});
-      });
-      this.mainWindow.on("blur", () => {
-        appEventBus.emit({name: "app", action: "blur"});
-      });
-
-      // clean up
-      this.mainWindow.on("closed", () => {
-        this.windowState.unmanage();
-        this.mainWindow = null;
-        this.splashWindow = null;
-        app.dock?.hide(); // hide icon in dock (mac-os)
-      });
+      this.mainWindow
+        .on("focus", () => {
+          appEventBus.emit({ name: "app", action: "focus" });
+        })
+        .on("blur", () => {
+          appEventBus.emit({ name: "app", action: "blur" });
+        })
+        .on("closed", () => {
+          // clean up
+          this.windowState.unmanage();
+          this.mainWindow = null;
+          this.splashWindow = null;
+          app.dock?.hide(); // hide icon in dock (mac-os)
+        })
+        .webContents
+        .on("new-window", (event, url) => {
+          event.preventDefault();
+          shell.openExternal(url);
+        })
+        .on("dom-ready", () => {
+          appEventBus.emit({ name: "app", action: "dom-ready" });
+        });
     }
 
     try {
@@ -91,8 +93,9 @@ export class WindowManager extends Singleton {
       setTimeout(() => {
         appEventBus.emit({ name: "app", action: "start" });
       }, 1000);
-    } catch (err) {
-      dialog.showErrorBox("ERROR!", err.toString());
+    } catch (error) {
+      logger.error("Showing main window failed", { error });
+      dialog.showErrorBox("ERROR!", error.toString());
     }
   }
 

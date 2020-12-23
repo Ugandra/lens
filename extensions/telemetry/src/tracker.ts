@@ -2,7 +2,7 @@ import { EventBus, Util, Store, App } from "@k8slens/extensions";
 import ua from "universal-analytics";
 import Analytics from "analytics-node";
 import { machineIdSync } from "node-machine-id";
-import { telemetryPreferencesStore } from "./telemetry-preferences-store";
+import { TelemetryPreferencesStore } from "./telemetry-preferences-store";
 import { reaction, IReactionDisposer } from "mobx";
 import { comparer } from "mobx";
 
@@ -24,7 +24,7 @@ export class Tracker extends Util.Singleton {
 
   protected reportInterval: NodeJS.Timeout;
 
-  private constructor() {
+  constructor() {
     super();
     this.anonymousId = machineIdSync();
     this.os = this.resolveOS();
@@ -97,18 +97,18 @@ export class Tracker extends Util.Singleton {
     });
   }
 
-  protected async isTelemetryAllowed(): Promise<boolean> {
-    return telemetryPreferencesStore.enabled;
+  protected isTelemetryAllowed(): boolean {
+    return TelemetryPreferencesStore.getInstance().enabled;
   }
 
   protected reportData() {
-    const clustersList = Store.clusterStore.enabledClustersList;
+    const clustersList = Store.ClusterStore.getInstance().enabledClustersList;
 
     this.event("generic-data", "report", {
       appVersion: App.version,
       os: this.os,
       clustersCount: clustersList.length,
-      workspacesCount: Store.workspaceStore.enabledWorkspacesList.length,
+      workspacesCount: Store.WorkspaceStore.getInstance().enabledWorkspacesList.length,
       extensions: App.getEnabledExtensions()
     });
 
@@ -152,9 +152,9 @@ export class Tracker extends Util.Singleton {
     return os;
   }
 
-  protected async event(eventCategory: string, eventAction: string, otherParams = {}) {
+  protected event(eventCategory: string, eventAction: string, otherParams = {}) {
     try {
-      const allowed = await this.isTelemetryAllowed();
+      const allowed = this.isTelemetryAllowed();
 
       if (!allowed) {
         return;
@@ -182,5 +182,3 @@ export class Tracker extends Util.Singleton {
     }
   }
 }
-
-export const tracker = Tracker.getInstance<Tracker>();

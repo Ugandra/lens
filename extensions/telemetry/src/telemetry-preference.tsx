@@ -4,9 +4,9 @@ import { observer } from "mobx-react";
 import { TelemetryPreferencesStore } from "./telemetry-preferences-store";
 
 @observer
-export class TelemetryPreferenceInput extends React.Component<{telemetry: TelemetryPreferencesStore}, {}> {
+export class TelemetryPreferenceInput extends React.Component {
   render() {
-    const { telemetry } = this.props;
+    const telemetry = TelemetryPreferencesStore.getInstance();
 
     return (
       <Component.Checkbox

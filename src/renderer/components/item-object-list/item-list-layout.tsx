@@ -17,7 +17,7 @@ import { Filter, FilterType, pageFilters } from "./page-filters.store";
 import { PageFiltersList } from "./page-filters-list";
 import { PageFiltersSelect } from "./page-filters-select";
 import { NamespaceSelectFilter } from "../+namespaces/namespace-select";
-import { themeStore } from "../../theme.store";
+import { ThemeStore } from "../../theme.store";
 
 // todo: refactor, split to small re-usable components
 
@@ -419,7 +419,7 @@ export class ItemListLayout extends React.Component<ItemListLayoutProps> {
             noItems={this.renderNoItems()}
             {...({
               ...tableProps,
-              className: cssNames("box grow", tableProps.className, themeStore.activeTheme.type),
+              className: cssNames("box grow", tableProps.className, ThemeStore.getInstance().activeTheme.type),
             })}
           >
             {renderTableHeader && (

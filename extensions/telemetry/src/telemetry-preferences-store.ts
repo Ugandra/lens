@@ -9,7 +9,7 @@ export class TelemetryPreferencesStore extends Store.ExtensionStore<TelemetryPre
 
   @observable  enabled = true;
 
-  private constructor() {
+  constructor() {
     super({
       configName: "preferences-store",
       defaults: {
@@ -30,5 +30,3 @@ export class TelemetryPreferencesStore extends Store.ExtensionStore<TelemetryPre
     });
   }
 }
-
-export const telemetryPreferencesStore = TelemetryPreferencesStore.getInstance<TelemetryPreferencesStore>();

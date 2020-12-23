@@ -5,14 +5,14 @@ import { observer } from "mobx-react";
 import { action, computed, observable } from "mobx";
 import { Icon } from "../icon";
 import { Select, SelectOption } from "../select";
-import { userStore } from "../../../common/user-store";
-import { HelmRepo, repoManager } from "../../../main/helm/helm-repo-manager";
+import { UserStore } from "../../../common/user-store";
+import { HelmRepo, HelmRepoManager } from "../../../main/helm/helm-repo-manager";
 import { Input } from "../input";
 import { Checkbox } from "../checkbox";
 import { Notifications } from "../notifications";
 import { Badge } from "../badge";
 import { Button } from "../button";
-import { themeStore } from "../../theme.store";
+import { ThemeStore } from "../../theme.store";
 import { Tooltip } from "../tooltip";
 import { KubectlBinaries } from "./kubectl-binaries";
 import { appPreferenceRegistry } from "../../../extensions/registries/app-preference-registry";
@@ -24,10 +24,10 @@ export class Preferences extends React.Component {
   @observable helmLoading = false;
   @observable helmRepos: HelmRepo[] = [];
   @observable helmAddedRepos = observable.map<string, HelmRepo>();
-  @observable httpProxy = userStore.preferences.httpsProxy || "";
+  @observable httpProxy = UserStore.getInstance().preferences.httpsProxy || "";
 
   @computed get themeOptions(): SelectOption<string>[] {
-    return themeStore.themes.map(theme => ({
+    return ThemeStore.getInstance().themes.map(theme => ({
       label: theme.name,
       value: theme.id,
     }));
@@ -50,9 +50,9 @@ export class Preferences extends React.Component {
 
     try {
       if (!this.helmRepos.length) {
-        this.helmRepos = await repoManager.loadAvailableRepos(); // via https://helm.sh
+        this.helmRepos = await HelmRepoManager.getInstance().loadAvailableRepos(); // via https://helm.sh
       }
-      const repos = await repoManager.repositories(); // via helm-cli
+      const repos = await HelmRepoManager.getInstance().repositories(); // via helm-cli
 
       this.helmAddedRepos.clear();
       repos.forEach(repo => this.helmAddedRepos.set(repo.name, repo));
@@ -64,7 +64,7 @@ export class Preferences extends React.Component {
 
   async addRepo(repo: HelmRepo) {
     try {
-      await repoManager.addRepo(repo);
+      await HelmRepoManager.getInstance().addRepo(repo);
       this.helmAddedRepos.set(repo.name, repo);
     } catch (err) {
       Notifications.error(<>Adding helm branch <b>{repo.name}</b> has failed: {String(err)}</>);
@@ -73,7 +73,7 @@ export class Preferences extends React.Component {
 
   async removeRepo(repo: HelmRepo) {
     try {
-      await repoManager.removeRepo(repo);
+      await HelmRepoManager.getInstance().removeRepo(repo);
       this.helmAddedRepos.delete(repo.name);
     } catch (err) {
       Notifications.error(
@@ -107,11 +107,10 @@ export class Preferences extends React.Component {
   };
 
   render() {
-    const { preferences } = userStore;
-    const header = <h2>Preferences</h2>;
+    const { preferences } = UserStore.getInstance();
 
     return (
-      <PageLayout showOnTop className="Preferences" header={header}>
+      <PageLayout showOnTop className="Preferences" header={<h2>Preferences</h2>}>
         <h2>Color Theme</h2>
         <Select
           options={this.themeOptions}

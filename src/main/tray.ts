@@ -5,8 +5,8 @@ import { autorun } from "mobx";
 import { showAbout } from "./menu";
 import { AppUpdater } from "./app-updater";
 import { WindowManager } from "./window-manager";
-import { clusterStore } from "../common/cluster-store";
-import { workspaceStore } from "../common/workspace-store";
+import { ClusterStore } from "../common/cluster-store";
+import { WorkspaceStore } from "../common/workspace-store";
 import { preferencesURL } from "../renderer/components/+preferences/preferences.route";
 import { clusterViewURL } from "../renderer/components/cluster-manager/cluster-view.route";
 import logger from "./logger";
@@ -81,10 +81,10 @@ export function createTrayMenu(windowManager: WindowManager): Menu {
     },
     {
       label: "Clusters",
-      submenu: workspaceStore.enabledWorkspacesList
-        .filter(workspace => clusterStore.getByWorkspaceId(workspace.id).length > 0) // hide empty workspaces
+      submenu: WorkspaceStore.getInstance().enabledWorkspacesList
+        .filter(workspace => ClusterStore.getInstance().getByWorkspaceId(workspace.id).length > 0) // hide empty workspaces
         .map(workspace => {
-          const clusters = clusterStore.getByWorkspaceId(workspace.id);
+          const clusters = ClusterStore.getInstance().getByWorkspaceId(workspace.id);
 
           return {
             label: workspace.name,
@@ -96,7 +96,7 @@ export function createTrayMenu(windowManager: WindowManager): Menu {
                 label: `${online ? "✓" : "\x20".repeat(3)/*offset*/}${label}`,
                 toolTip: clusterId,
                 async click() {
-                  workspaceStore.setActive(workspace);
+                  WorkspaceStore.getInstance().setActive(workspace);
                   windowManager.navigate(clusterViewURL({ params: { clusterId } }));
                 }
               };

@@ -160,5 +160,3 @@ export class HelmRepoManager extends Singleton {
     return stdout;
   }
 }
-
-export const repoManager = HelmRepoManager.getInstance<HelmRepoManager>();

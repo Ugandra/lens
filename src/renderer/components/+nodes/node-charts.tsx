@@ -6,14 +6,14 @@ import { NoMetrics } from "../resource-metrics/no-metrics";
 import { IResourceMetricsValue, ResourceMetricsContext } from "../resource-metrics";
 import { observer } from "mobx-react";
 import { ChartOptions, ChartPoint } from "chart.js";
-import { themeStore } from "../../theme.store";
+import { ThemeStore } from "../../theme.store";
 
 type IContext = IResourceMetricsValue<Node, { metrics: IClusterMetrics }>;
 
 export const NodeCharts = observer(() => {
   const { params: { metrics }, tabId, object } = useContext<IContext>(ResourceMetricsContext);
   const id = object.getId();
-  const { chartCapacityColor } = themeStore.activeTheme.colors;
+  const { chartCapacityColor } = ThemeStore.getInstance().activeTheme.colors;
 
   if (!metrics) return null;
   if (isMetricsEmpty(metrics)) return <NoMetrics/>;

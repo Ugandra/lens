@@ -11,7 +11,7 @@ import { General } from "./general";
 import { Cluster } from "../../../main/cluster";
 import { ClusterIcon } from "../cluster-icon";
 import { IClusterSettingsRouteParams } from "./cluster-settings.route";
-import { clusterStore } from "../../../common/cluster-store";
+import { ClusterStore } from "../../../common/cluster-store";
 import { PageLayout } from "../layout/page-layout";
 import { requestMain } from "../../../common/ipc";
 import { clusterActivateHandler, clusterRefreshHandler } from "../../../common/cluster-ipc";
@@ -26,7 +26,7 @@ export class ClusterSettings extends React.Component<Props> {
   }
 
   get cluster(): Cluster {
-    return clusterStore.getById(this.clusterId);
+    return ClusterStore.getInstance().getById(this.clusterId);
   }
 
   componentDidMount() {
@@ -34,7 +34,7 @@ export class ClusterSettings extends React.Component<Props> {
       reaction(() => this.cluster, this.refreshCluster, {
         fireImmediately: true,
       }),
-      reaction(() => this.clusterId, clusterId => clusterStore.setActive(clusterId), {
+      reaction(() => this.clusterId, clusterId => ClusterStore.getInstance().setActive(clusterId), {
         fireImmediately: true,
       })
     ]);

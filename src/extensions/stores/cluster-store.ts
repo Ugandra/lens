@@ -1,4 +1,4 @@
-import { clusterStore as internalClusterStore, ClusterId } from "../../common/cluster-store";
+import { ClusterStore as InternalClusterStore, ClusterId } from "../../common/cluster-store";
 import type { ClusterModel } from "../../common/cluster-store";
 import { Cluster } from "../../main/cluster";
 import { Singleton } from "../core-api/utils";
@@ -12,27 +12,32 @@ export type { ClusterModel, ClusterId } from "../../common/cluster-store";
  *
  * @beta
  */
+
+// @ts-ignore
 export class ClusterStore extends Singleton {
+  static getInstance(): ClusterStore {
+    return ClusterStore.getInstanceOrCreate();
+  }
 
   /**
    * Active cluster id
    */
   get activeClusterId(): string {
-    return internalClusterStore.activeCluster;
+    return InternalClusterStore.getInstance().activeCluster;
   }
 
   /**
    * Set active cluster id
    */
   set activeClusterId(id : ClusterId) {
-    internalClusterStore.activeCluster = id;
+    InternalClusterStore.getInstance().activeCluster = id;
   }
 
   /**
    * Map of all clusters
    */
   get clusters(): ObservableMap<string, Cluster> {
-    return internalClusterStore.clusters;
+    return InternalClusterStore.getInstance().clusters;
   }
 
   /**
@@ -50,21 +55,21 @@ export class ClusterStore extends Singleton {
    * Array of all clusters
    */
   get clustersList(): Cluster[] {
-    return internalClusterStore.clustersList;
+    return InternalClusterStore.getInstance().clustersList;
   }
 
   /**
    * Array of all enabled clusters
    */
   get enabledClustersList(): Cluster[] {
-    return internalClusterStore.enabledClustersList;
+    return InternalClusterStore.getInstance().enabledClustersList;
   }
 
   /**
    * Array of all clusters that have active connection to a Kubernetes cluster
    */
   get connectedClustersList(): Cluster[] {
-    return internalClusterStore.connectedClustersList;
+    return InternalClusterStore.getInstance().connectedClustersList;
   }
 
   /**
@@ -72,7 +77,7 @@ export class ClusterStore extends Singleton {
    * @param id cluster id
    */
   getById(id: ClusterId): Cluster {
-    return internalClusterStore.getById(id);
+    return InternalClusterStore.getInstance().getById(id);
   }
 
   /**
@@ -80,7 +85,7 @@ export class ClusterStore extends Singleton {
    * @param workspaceId workspace id
    */
   getByWorkspaceId(workspaceId: string): Cluster[] {
-    return internalClusterStore.getByWorkspaceId(workspaceId);
+    return InternalClusterStore.getInstance().getByWorkspaceId(workspaceId);
   }
 
   /**
@@ -88,7 +93,7 @@ export class ClusterStore extends Singleton {
    * @param models list of cluster models
    */
   addClusters(...models: ClusterModel[]): Cluster[] {
-    return internalClusterStore.addClusters(...models);
+    return InternalClusterStore.getInstance().addClusters(...models);
   }
 
   /**
@@ -96,7 +101,7 @@ export class ClusterStore extends Singleton {
    * @param model cluster
    */
   addCluster(model: ClusterModel | Cluster): Cluster {
-    return internalClusterStore.addCluster(model);
+    return InternalClusterStore.getInstance().addCluster(model);
   }
 
   /**
@@ -112,7 +117,7 @@ export class ClusterStore extends Singleton {
    * @param clusterId cluster id
    */
   async removeById(clusterId: ClusterId) {
-    return internalClusterStore.removeById(clusterId);
+    return InternalClusterStore.getInstance().removeById(clusterId);
   }
 
   /**
@@ -120,9 +125,6 @@ export class ClusterStore extends Singleton {
    * @param workspaceId workspace id
    */
   removeByWorkspaceId(workspaceId: string) {
-    return internalClusterStore.removeByWorkspaceId(workspaceId);
+    return InternalClusterStore.getInstance().removeByWorkspaceId(workspaceId);
   }
 }
-
-
-export const clusterStore = ClusterStore.getInstance<ClusterStore>();

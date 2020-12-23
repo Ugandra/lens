@@ -6,7 +6,7 @@ import "@testing-library/jest-dom/extend-expect";
 
 import { MainLayoutHeader } from "../main-layout-header";
 import { Cluster } from "../../../../main/cluster";
-import { workspaceStore } from "../../../../common/workspace-store";
+import { WorkspaceStore } from "../../../../common/workspace-store";
 import { broadcastMessage } from "../../../../common/ipc";
 
 const mockBroadcastIpc = broadcastMessage as jest.MockedFunction<typeof broadcastMessage>;
@@ -15,7 +15,7 @@ const cluster: Cluster = new Cluster({
   id: "foo",
   contextName: "minikube",
   kubeConfigPath: "minikube-config.yml",
-  workspace: workspaceStore.currentWorkspaceId
+  workspace: WorkspaceStore.defaultId
 });
 
 describe("<MainLayoutHeader />", () => {

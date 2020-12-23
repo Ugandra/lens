@@ -5,8 +5,13 @@ import "@testing-library/jest-dom/extend-expect";
 import { BottomBar } from "./bottom-bar";
 jest.mock("../../../extensions/registries");
 import { statusBarRegistry } from "../../../extensions/registries";
+import { WorkspaceStore } from "../../../common/workspace-store";
 
 describe("<BottomBar />", () => {
+  beforeEach(() => {
+    WorkspaceStore.resetInstance();
+    WorkspaceStore.getInstanceOrCreate();
+  });
 
   it("renders w/o errors", () => {
     const { container } = render(<BottomBar />);

@@ -1,19 +1,23 @@
 import { LensMainExtension } from "@k8slens/extensions";
-import { telemetryPreferencesStore } from "./src/telemetry-preferences-store";
-import { tracker } from "./src/tracker";
+import { TelemetryPreferencesStore } from "./src/telemetry-preferences-store";
+import { Tracker } from "./src/tracker";
 
 export default class TelemetryMainExtension extends LensMainExtension {
 
   async onActivate() {
     console.log("telemetry main extension activated");
-    tracker.start();
-    tracker.reportPeriodically();
-    tracker.watchExtensions();
-    await telemetryPreferencesStore.loadExtension(this);
+    const telStore = TelemetryPreferencesStore.getInstanceOrCreate();
+
+    Tracker.getInstanceOrCreate().start();
+    Tracker.getInstance().reportPeriodically();
+    Tracker.getInstance().watchExtensions();
+    await telStore.loadExtension(this);
   }
 
   onDeactivate() {
-    tracker.stop();
+    TelemetryPreferencesStore.resetInstance();
+    Tracker.getInstance().stop();
+    Tracker.resetInstance();
     console.log("telemetry main extension deactivated");
   }
 }

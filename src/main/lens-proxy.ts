@@ -7,22 +7,21 @@ import * as WebSocket from "ws";
 import { apiPrefix, apiKubePrefix } from "../common/vars";
 import { openShell } from "./node-shell-session";
 import { Router } from "./router";
-import { ClusterManager } from "./cluster-manager";
 import { ContextHandler } from "./context-handler";
 import logger from "./logger";
+import { Singleton } from "../common/utils";
+import { ClusterManager } from "./cluster-manager";
 
-export class LensProxy {
+export class LensProxy extends Singleton {
   protected origin: string;
   protected proxyServer: http.Server;
   protected router: Router;
   protected closed = false;
   protected retryCounters = new Map<string, number>();
 
-  static create(port: number, clusterManager: ClusterManager) {
-    return new LensProxy(port, clusterManager).listen();
-  }
+  constructor(protected port: number) {
+    super();
 
-  private constructor(protected port: number, protected clusterManager: ClusterManager) {
     this.origin = `http://localhost:${port}`;
     this.router = new Router();
   }
@@ -66,7 +65,7 @@ export class LensProxy {
   }
 
   protected async handleProxyUpgrade(proxy: httpProxy, req: http.IncomingMessage, socket: net.Socket, head: Buffer) {
-    const cluster = this.clusterManager.getClusterForRequest(req);
+    const cluster = ClusterManager.getInstance().getClusterForRequest(req);
 
     if (cluster) {
       const proxyUrl = await cluster.contextHandler.resolveAuthProxyUrl() + req.url.replace(apiKubePrefix, "");
@@ -165,7 +164,7 @@ export class LensProxy {
     const ws = new WebSocket.Server({ noServer: true });
 
     return ws.on("connection", ((socket: WebSocket, req: http.IncomingMessage) => {
-      const cluster = this.clusterManager.getClusterForRequest(req);
+      const cluster = ClusterManager.getInstance().getClusterForRequest(req);
       const nodeParam = url.parse(req.url, true).query["node"]?.toString();
 
       openShell(socket, cluster, nodeParam);
@@ -187,7 +186,7 @@ export class LensProxy {
   }
 
   protected async handleRequest(proxy: httpProxy, req: http.IncomingMessage, res: http.ServerResponse) {
-    const cluster = this.clusterManager.getClusterForRequest(req);
+    const cluster = ClusterManager.getInstance().getClusterForRequest(req);
 
     if (cluster) {
       const proxyTarget = await this.getProxyTarget(req, cluster.contextHandler);

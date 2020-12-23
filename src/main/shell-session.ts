@@ -10,7 +10,7 @@ import { ClusterPreferences } from "../common/cluster-store";
 import { helmCli } from "./helm/helm-cli";
 import { isWindows } from "../common/vars";
 import { appEventBus } from "../common/event-bus";
-import { userStore } from "../common/user-store";
+import { UserStore } from "../common/user-store";
 
 export class ShellSession extends EventEmitter {
   static shellEnvs: Map<string, any> = new Map();
@@ -38,9 +38,9 @@ export class ShellSession extends EventEmitter {
 
   public async open() {
     this.kubectlBinDir = await this.kubectl.binDir();
-    const pathFromPreferences = userStore.preferences.kubectlBinariesPath || this.kubectl.getBundledPath();
+    const pathFromPreferences = UserStore.getInstance().preferences.kubectlBinariesPath || this.kubectl.getBundledPath();
 
-    this.kubectlPathDir = userStore.preferences.downloadKubectlBinaries ? this.kubectlBinDir : path.dirname(pathFromPreferences);
+    this.kubectlPathDir = UserStore.getInstance().preferences.downloadKubectlBinaries ? this.kubectlBinDir : path.dirname(pathFromPreferences);
     this.helmBinDir = helmCli.getBinaryDir();
     const env = await this.getCachedShellEnv();
     const shell = env.PTYSHELL;

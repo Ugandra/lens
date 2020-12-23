@@ -16,22 +16,18 @@ import { getFreePort } from "./port";
 import { mangleProxyEnv } from "./proxy-env";
 import { registerFileProtocol } from "../common/register-protocol";
 import logger from "./logger";
-import { clusterStore } from "../common/cluster-store";
-import { userStore } from "../common/user-store";
-import { workspaceStore } from "../common/workspace-store";
+import { ClusterStore } from "../common/cluster-store";
+import { UserStore } from "../common/user-store";
+import { WorkspaceStore } from "../common/workspace-store";
 import { appEventBus } from "../common/event-bus";
-import { extensionLoader } from "../extensions/extension-loader";
-import { extensionsStore } from "../extensions/extensions-store";
-import { InstalledExtension, extensionDiscovery } from "../extensions/extension-discovery";
+import { ExtensionLoader } from "../extensions/extension-loader";
+import { ExtensionsStore } from "../extensions/extensions-store";
+import { InstalledExtension, ExtensionDiscovery } from "../extensions/extension-discovery";
 import type { LensExtensionId } from "../extensions/lens-extension";
+import { FilesystemProvisionerStore } from "./extension-filesystem";
 import { installDeveloperTools } from "./developer-tools";
-import { filesystemProvisionerStore } from "./extension-filesystem";
 
 const workingDir = path.join(app.getPath("appData"), appName);
-let proxyPort: number;
-let proxyServer: LensProxy;
-let clusterManager: ClusterManager;
-let windowManager: WindowManager;
 
 app.setName(appName);
 
@@ -52,7 +48,7 @@ if (!instanceLock) {
 }
 
 app.on("second-instance", () => {
-  windowManager?.ensureMainWindow();
+  WindowManager.getInstance(false)?.ensureMainWindow();
 });
 
 if (process.env.LENS_DISABLE_GPU) {
@@ -73,7 +69,11 @@ app.on("ready", async () => {
 
   registerFileProtocol("static", __static);
 
-  await installDeveloperTools();
+  const userStore = UserStore.getInstanceOrCreate();
+  const clusterStore = ClusterStore.getInstanceOrCreate();
+  const workspaceStore = WorkspaceStore.getInstanceOrCreate();
+  const extensionsStore = ExtensionsStore.getInstanceOrCreate();
+  const filesystemStore = FilesystemProvisionerStore.getInstanceOrCreate();
 
   // preload
   await Promise.all([
@@ -81,10 +81,12 @@ app.on("ready", async () => {
     clusterStore.load(),
     workspaceStore.load(),
     extensionsStore.load(),
-    filesystemProvisionerStore.load(),
+    filesystemStore.load(),
   ]);
 
   // find free port
+  let proxyPort;
+
   try {
     proxyPort = await getFreePort();
   } catch (error) {
@@ -94,21 +96,25 @@ app.on("ready", async () => {
   }
 
   // create cluster manager
-  clusterManager = ClusterManager.getInstance<ClusterManager>(proxyPort);
+  ClusterManager.getInstanceOrCreate(proxyPort);
 
   // run proxy
   try {
     // eslint-disable-next-line unused-imports/no-unused-vars-ts
-    proxyServer = LensProxy.create(proxyPort, clusterManager);
+    LensProxy.getInstanceOrCreate(proxyPort).listen();
   } catch (error) {
     logger.error(`Could not start proxy (127.0.0:${proxyPort}): ${error?.message}`);
     dialog.showErrorBox("Lens Error", `Could not start proxy (127.0.0:${proxyPort}): ${error?.message || "unknown error"}`);
     app.exit();
   }
 
-  extensionLoader.init();
+  const extensionDiscovery = ExtensionDiscovery.getInstanceOrCreate();
+
+  ExtensionLoader.getInstanceOrCreate().init();
   extensionDiscovery.init();
-  windowManager = WindowManager.getInstance<WindowManager>(proxyPort);
+  WindowManager.getInstanceOrCreate(proxyPort);
+
+  installDeveloperTools();
 
   // call after windowManager to see splash earlier
   try {
@@ -118,14 +124,15 @@ app.on("ready", async () => {
     extensionDiscovery.watchExtensions();
 
     // Subscribe to extensions that are copied or deleted to/from the extensions folder
-    extensionDiscovery.events.on("add", (extension: InstalledExtension) => {
-      extensionLoader.addExtension(extension);
-    });
-    extensionDiscovery.events.on("remove", (lensExtensionId: LensExtensionId) => {
-      extensionLoader.removeExtension(lensExtensionId);
-    });
+    extensionDiscovery.events
+      .on("add", (extension: InstalledExtension) => {
+        ExtensionLoader.getInstance().addExtension(extension);
+      })
+      .on("remove", (lensExtensionId: LensExtensionId) => {
+        ExtensionLoader.getInstance().removeExtension(lensExtensionId);
+      });
 
-    extensionLoader.initExtensions(extensions);
+    ExtensionLoader.getInstance().initExtensions(extensions);
   } catch (error) {
     dialog.showErrorBox("Lens Error", `Could not load extensions${error?.message ? `: ${error.message}` : ""}`);
     console.error(error);
@@ -141,7 +148,7 @@ app.on("activate", (event, hasVisibleWindows) => {
   logger.info("APP:ACTIVATE", { hasVisibleWindows });
 
   if (!hasVisibleWindows) {
-    windowManager?.initMainWindow(false);
+    WindowManager.getInstance(false)?.initMainWindow(false);
   }
 });
 
@@ -150,7 +157,7 @@ app.on("will-quit", (event) => {
   logger.info("APP:QUIT");
   appEventBus.emit({name: "app", action: "close"});
   event.preventDefault(); // prevent app's default shutdown (e.g. required for telemetry, etc.)
-  clusterManager?.stop(); // close cluster connections
+  ClusterManager.getInstance(false)?.stop(); // close cluster connections
 
   return; // skip exit to make tray work, to quit go to app's global menu or tray's menu
 });

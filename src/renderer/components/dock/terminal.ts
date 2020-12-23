@@ -4,7 +4,7 @@ import { Terminal as XTerm } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { dockStore, TabId } from "./dock.store";
 import { TerminalApi } from "../../api/terminal-api";
-import { themeStore } from "../../theme.store";
+import { ThemeStore } from "../../theme.store";
 import { autobind } from "../../utils";
 
 export class Terminal {
@@ -108,7 +108,7 @@ export class Terminal {
     window.addEventListener("resize", this.onResize);
 
     this.disposers.push(
-      reaction(() => toJS(themeStore.activeTheme.colors), this.setTheme, {
+      reaction(() => toJS(ThemeStore.getInstance().activeTheme.colors), this.setTheme, {
         fireImmediately: true
       }),
       dockStore.onResize(this.onResize),

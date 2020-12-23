@@ -6,10 +6,11 @@ import { observable, reaction, toJS, when } from "mobx";
 import os from "os";
 import path from "path";
 import { broadcastMessage, handleRequest, requestMain, subscribeToBroadcast } from "../common/ipc";
+import { Singleton } from "../common/utils";
 import { getBundledExtensions } from "../common/utils/app-version";
 import logger from "../main/logger";
 import { extensionInstaller, PackageJson } from "./extension-installer";
-import { extensionsStore } from "./extensions-store";
+import { ExtensionsStore } from "./extensions-store";
 import type { LensExtensionId, LensExtensionManifest } from "./lens-extension";
 
 export interface InstalledExtension {
@@ -51,7 +52,7 @@ const isDirectoryLike = (lstat: fs.Stats) => lstat.isDirectory() || lstat.isSymb
  * - "add": When extension is added. The event is of type InstalledExtension
  * - "remove": When extension is removed. The event is of type LensExtensionId
  */
-export class ExtensionDiscovery {
+export class ExtensionDiscovery extends Singleton {
   protected bundledFolderPath: string;
 
   private loadStarted = false;
@@ -67,6 +68,7 @@ export class ExtensionDiscovery {
   public events: EventEmitter;
 
   constructor() {
+    super();
     this.events = new EventEmitter();
   }
 
@@ -326,7 +328,7 @@ export class ExtensionDiscovery {
       manifestJson = __non_webpack_require__(manifestPath);
       const installedManifestPath = this.getInstalledManifestPath(manifestJson.name);
 
-      const isEnabled = isBundled || extensionsStore.isEnabled(installedManifestPath);
+      const isEnabled = isBundled || ExtensionsStore.getInstance().isEnabled(installedManifestPath);
 
       return {
         id: installedManifestPath,
@@ -462,5 +464,3 @@ export class ExtensionDiscovery {
     broadcastMessage(ExtensionDiscovery.extensionDiscoveryChannel, this.toJSON());
   }
 }
-
-export const extensionDiscovery = new ExtensionDiscovery();

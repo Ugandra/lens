@@ -36,7 +36,7 @@ export class ExamplePreferencesStore extends Store.ExtensionStore<ExamplePrefere
       }
     });
   }
- 
+
   protected fromStore({ enabled }: ExamplePreferencesModel): void {
     this.enabled = enabled;
   }
@@ -50,7 +50,7 @@ export class ExamplePreferencesStore extends Store.ExtensionStore<ExamplePrefere
   }
 }
 
-export const examplePreferencesStore = ExamplePreferencesStore.getInstance<ExamplePreferencesStore>();
+export const examplePreferencesStore = ExamplePreferencesStore.getInstanceOrCreate();
 ```
 
 First the extension's data model is defined using a simple type, `ExamplePreferencesModel`, which has a single field, `enabled`, representing the preference's state.
@@ -60,7 +60,7 @@ Note the use of the `observer` decorator on the `enabled` field.
 As for the [`appPreferences` guide example](../renderer-extension#apppreferences), [`mobx`](https://mobx.js.org/README.html) is used for the UI state management, ensuring the checkbox updates when activated by the user.
 
 Then the constructor and two abstract methods are implemented.
-In the constructor, the name of the store (`"example-preferences-store"`), and the default (initial) value for the preference state (`enabled: false`) are specified. 
+In the constructor, the name of the store (`"example-preferences-store"`), and the default (initial) value for the preference state (`enabled: false`) are specified.
 The `fromStore()` method is called by Lens internals when the store is loaded, and gives the extension the opportunity to retrieve the stored state data values based on the defined data model.
 Here, the `enabled` field of the `ExamplePreferencesStore` is set to the value from the store whenever `fromStore()` is invoked.
 The `toJSON()` method is complementary to `fromStore()`, and is called when the store is being saved.
@@ -130,7 +130,7 @@ export class ExamplePreferenceInput extends React.Component<ExamplePreferencePro
 
   render() {
     const { preference } = this.props;
-    
+
     return (
       <Component.Checkbox
         label="I understand appPreferences"
@@ -151,5 +151,5 @@ export class ExamplePreferenceHint extends React.Component {
 ```
 
 The only change here is that `ExamplePreferenceProps` defines its `preference` field as an `ExamplePreferencesStore` type.
-Everything else works as before except now the `enabled` state persists across Lens restarts because it is managed by the 
+Everything else works as before except now the `enabled` state persists across Lens restarts because it is managed by the
 `examplePreferencesStore`.

@@ -1,4 +1,4 @@
-import { workspaceStore } from "./workspace-store";
+import { WorkspaceStore } from "./workspace-store";
 import path from "path";
 import { app, ipcRenderer, remote, webFrame } from "electron";
 import { unlink } from "fs-extra";
@@ -110,7 +110,7 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
 
   private static stateRequestChannel = "cluster:states";
 
-  private constructor() {
+  constructor() {
     super({
       configName: "lens-cluster-store",
       accessPropertiesByDotNotation: false, // To make dots safe in cluster context names
@@ -216,7 +216,7 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
     const clusterId = this.clusters.has(id) ? id : null;
 
     this.activeCluster = clusterId;
-    workspaceStore.setLastActiveClusterId(clusterId);
+    WorkspaceStore.getInstance().setLastActiveClusterId(clusterId);
   }
 
   @action
@@ -352,8 +352,6 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
   }
 }
 
-export const clusterStore = ClusterStore.getInstance<ClusterStore>();
-
 export function getClusterIdFromHost(hostname: string): ClusterId {
   const subDomains = hostname.split(":")[0].split(".");
 
@@ -369,5 +367,5 @@ export function getHostedClusterId() {
 }
 
 export function getHostedCluster(): Cluster {
-  return clusterStore.getById(getHostedClusterId());
+  return ClusterStore.getInstance().getById(getHostedClusterId());
 }

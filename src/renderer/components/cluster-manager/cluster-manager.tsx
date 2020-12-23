@@ -13,7 +13,7 @@ import { AddCluster, addClusterRoute } from "../+add-cluster";
 import { ClusterView } from "./cluster-view";
 import { ClusterSettings, clusterSettingsRoute } from "../+cluster-settings";
 import { clusterViewRoute, clusterViewURL } from "./cluster-view.route";
-import { clusterStore } from "../../../common/cluster-store";
+import { ClusterStore } from "../../../common/cluster-store";
 import { hasLoadedView, initView, lensViews, refreshViews } from "./lens-views";
 import { globalPageRegistry } from "../../../extensions/registries/page-registry";
 import { Extensions, extensionsRoute } from "../+extensions";
@@ -22,7 +22,7 @@ import { getMatchedClusterId } from "../../navigation";
 @observer
 export class ClusterManager extends React.Component {
   componentDidMount() {
-    const getMatchedCluster = () => clusterStore.getById(getMatchedClusterId());
+    const getMatchedCluster = () => ClusterStore.getInstance().getById(getMatchedClusterId());
 
     disposeOnUnmount(this, [
       reaction(getMatchedClusterId, initView, {
@@ -45,7 +45,7 @@ export class ClusterManager extends React.Component {
   }
 
   get startUrl() {
-    const { activeClusterId } = clusterStore;
+    const { activeClusterId } = ClusterStore.getInstance();
 
     if (activeClusterId) {
       return clusterViewURL({

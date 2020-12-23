@@ -33,7 +33,7 @@ export interface UserPreferences {
 export class UserStore extends BaseStore<UserStoreModel> {
   static readonly defaultTheme: ThemeId = "lens-dark";
 
-  private constructor() {
+  constructor() {
     super({
       // configName: "lens-user-store", // todo: migrate from default "config.json"
       migrations,
@@ -124,14 +124,6 @@ export class UserStore extends BaseStore<UserStoreModel> {
     this.newContexts.clear();
   }
 
-  /**
-   * Getting default directory to download kubectl binaries
-   * @returns string
-   */
-  getDefaultKubectlPath(): string {
-    return path.join((app || remote.app).getPath("userData"), "binaries");
-  }
-
   @action
   protected async fromStore(data: Partial<UserStoreModel> = {}) {
     const { lastSeenAppVersion, seenContexts = [], preferences, kubeConfigPath } = data;
@@ -161,4 +153,10 @@ export class UserStore extends BaseStore<UserStoreModel> {
   }
 }
 
-export const userStore = UserStore.getInstance<UserStore>();
+/**
+ * Getting default directory to download kubectl binaries
+ * @returns string
+ */
+export function getDefaultKubectlPath(): string {
+  return path.join((app || remote.app).getPath("userData"), "binaries");
+}

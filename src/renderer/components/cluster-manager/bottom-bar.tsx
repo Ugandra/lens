@@ -4,13 +4,13 @@ import React from "react";
 import { observer } from "mobx-react";
 import { Icon } from "../icon";
 import { WorkspaceMenu } from "../+workspaces/workspace-menu";
-import { workspaceStore } from "../../../common/workspace-store";
+import { WorkspaceStore } from "../../../common/workspace-store";
 import { statusBarRegistry } from "../../../extensions/registries";
 
 @observer
 export class BottomBar extends React.Component {
   render() {
-    const { currentWorkspace } = workspaceStore;
+    const { currentWorkspace } = WorkspaceStore.getInstance();
     // in case .getItems() returns undefined
     const items = statusBarRegistry.getItems() ?? [];
 

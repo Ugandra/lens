@@ -1,6 +1,6 @@
 import { computed, observable, reaction } from "mobx";
-import { autobind } from "./utils";
-import { userStore } from "../common/user-store";
+import { autobind, Singleton } from "./utils";
+import { UserStore } from "../common/user-store";
 import logger from "../main/logger";
 
 export type ThemeId = string;
@@ -20,7 +20,7 @@ export interface Theme {
 }
 
 @autobind()
-export class ThemeStore {
+export class ThemeStore extends Singleton {
   protected styles: HTMLStyleElement;
 
   // bundled themes from `themes/${themeId}.json`
@@ -30,7 +30,7 @@ export class ThemeStore {
   ];
 
   @computed get activeThemeId() {
-    return userStore.preferences.colorTheme;
+    return UserStore.getInstance().preferences.colorTheme;
   }
 
   @computed get activeTheme(): Theme {
@@ -43,6 +43,8 @@ export class ThemeStore {
   }
 
   constructor() {
+    super();
+
     // auto-apply active theme
     reaction(() => this.activeThemeId, async themeId => {
       try {
@@ -50,7 +52,7 @@ export class ThemeStore {
         this.applyTheme();
       } catch (err) {
         logger.error(err);
-        userStore.resetTheme();
+        UserStore.getInstance().resetTheme();
       }
     }, {
       fireImmediately: true,
@@ -104,5 +106,3 @@ export class ThemeStore {
     body.classList.toggle("theme-light", theme.type === ThemeType.LIGHT);
   }
 }
-
-export const themeStore = new ThemeStore();

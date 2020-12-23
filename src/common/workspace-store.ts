@@ -1,7 +1,7 @@
 import { ipcRenderer } from "electron";
 import { action, computed, observable, toJS, reaction } from "mobx";
 import { BaseStore } from "./base-store";
-import { clusterStore } from "./cluster-store";
+import { ClusterStore } from "./cluster-store";
 import { appEventBus } from "./event-bus";
 import { broadcastMessage, handleRequest, requestMain } from "../common/ipc";
 import logger from "../main/logger";
@@ -134,7 +134,7 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
   static readonly defaultId: WorkspaceId = "default";
   private static stateRequestChannel = "workspace:states";
 
-  private constructor() {
+  constructor() {
     super({
       configName: "lens-workspace-store",
     });
@@ -279,7 +279,7 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
     }
     this.workspaces.delete(id);
     appEventBus.emit({name: "workspace", action: "remove"});
-    clusterStore.removeByWorkspaceId(id);
+    ClusterStore.getInstance().removeByWorkspaceId(id);
   }
 
   @action
@@ -315,5 +315,3 @@ export class WorkspaceStore extends BaseStore<WorkspaceStoreModel> {
     });
   }
 }
-
-export const workspaceStore = WorkspaceStore.getInstance<WorkspaceStore>();

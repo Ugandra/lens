@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "concurrently -k \"yarn run dev-run -C\" yarn:dev:*",
     "dev-build": "concurrently yarn:compile:*",
-    "dev-run": "nodemon --watch static/build/main.js --exec \"electron --inspect .\"",
+    "dev-run": "nodemon --watch static/build/main.js --exec \"electron --inspect=0 .\"",
     "dev:main": "yarn run compile:main --watch",
     "dev:renderer": "yarn run webpack-dev-server --config webpack.renderer.ts",
     "dev:extension-types": "yarn run compile:extension-types --watch",
@@ -285,7 +285,7 @@
     "@types/webpack-dev-server": "^3.11.1",
     "@types/webpack-env": "^1.15.2",
     "@types/webpack-node-externals": "^1.7.1",
-    "@typescript-eslint/eslint-plugin": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.11.0",
     "@typescript-eslint/parser": "^4.0.0",
     "ace-builds": "^1.4.11",
     "ansi_up": "^4.0.4",
