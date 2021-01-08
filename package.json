@@ -9,7 +9,7 @@
   "author": {
     "name": "Mirantis, Inc.",
     "email": "info@k8slens.dev"
-  },
+  },fdfdfdfdfdfdfdfdffdffffdfddf
   "scripts": {
     "dev": "concurrently -k \"yarn run dev-run -C\" yarn:dev:*",
     "dev-build": "concurrently yarn:compile:*",
