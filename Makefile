@@ -8,7 +8,7 @@ ifeq ($(OS),Windows_NT)
 else
     DETECTED_OS := $(shell uname)
 endif
-
+sdsdsdsdsdd
 binaries/client:
 	yarn download-bins
 
